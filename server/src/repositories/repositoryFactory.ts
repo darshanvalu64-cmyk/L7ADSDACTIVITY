@@ -1,21 +1,11 @@
 
-export interface Note {
-  id: string;
-  title: string;
-  body: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { InMemoryNoteRepository } from './InMemoryNoteRepository.js';
+import type { NoteRepository } from './NoteRepository.js';
 
-export interface NoteInput {
-  title: string;
-  body: string;
-}
+export function createNoteRepository(storeType: string): NoteRepository {
+  if (storeType === 'memory') {
+    return new InMemoryNoteRepository();
+  }
 
-export interface NoteRepository {
-  findAll(): Promise<Note[]>;
-  findById(id: string): Promise<Note | undefined>;
-  create(input: NoteInput): Promise<Note>;
-  update(id: string, input: NoteInput): Promise<Note | undefined>;
-  delete(id: string): Promise<boolean>;
+  throw new Error(`Unknown store type: ${storeType}`);
 }
