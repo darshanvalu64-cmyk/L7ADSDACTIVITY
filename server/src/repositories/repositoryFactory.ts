@@ -1,3 +1,4 @@
+
 import { InMemoryNoteRepository } from './InMemoryNoteRepository.js';
 import type { NoteRepository } from './NoteRepository.js';
 
