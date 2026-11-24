@@ -1,4 +1,3 @@
-
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -27,4 +26,43 @@ test('a user can create a note', async ({ page }) => {
 
   await expect(page.getByText('Milk and bread').first()).toBeVisible();
   await expect(page.getByLabel('Title')).toHaveValue('');
+});
+
+test('a note is still there after the page is reloaded', async ({ page }) => {
+  const title = unique('Persistent');
+
+  await addNote(page, title, 'This note should remain');
+  await page.reload();
+
+  await expect(page.getByRole('heading', { name: title })).toBeVisible();
+});
+
+test('a user can edit a note', async ({ page }) => {
+  const title = unique('Original');
+  const updatedTitle = unique('Updated');
+
+  await addNote(page, title, 'Original body');
+
+  await page.getByRole('button', { name: `Edit ${title}` }).click();
+  await page.getByLabel('Title').fill(updatedTitle);
+  await page.getByRole('button', { name: 'Save changes' }).click();
+
+  await expect(page.getByRole('heading', { name: updatedTitle })).toBeVisible();
+  await expect(page.getByRole('heading', { name: title })).toHaveCount(0);
+});
+
+test('a user can delete a note', async ({ page }) => {
+  const title = unique('Delete');
+
+  await addNote(page, title, 'This note will be deleted');
+
+  await page.getByRole('button', { name: `Delete ${title}` }).click();
+
+  await expect(page.getByRole('heading', { name: title })).toHaveCount(0);
+});
+
+test('a note without a title is refused', async ({ page }) => {
+  await page.getByRole('button', { name: 'Add note' }).click();
+
+  await expect(page.getByRole('alert')).toHaveText('Title is required');
 });
